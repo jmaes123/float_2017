@@ -17,35 +17,76 @@ SoftwareSerial serial(10,11);
 RoboClaw roboclaw(&serial,10000);
 
 
-unsigned long msTime = 0;
+static unsigned long msTime = 0;
+static bool bearOff = true;
+
 void setup() {
   //Open terminal and roboclaw serial ports
   terminal.begin(57600);
   roboclaw.begin(57600);
-  
-  //Set PID Coefficients
- roboclaw.SetM1VelocityPID(RCAddress,RC_Kd,RC_Kp,RC_Ki,RC_qpps);  
+   
 
   pinMode(BEAR_CCW_SWITCH_PIN, INPUT_PULLUP);
   pinMode(BEAR_CW_SWITCH_PIN, INPUT_PULLUP);
   pinMode(CONTROL_SWITCH_BEAR_PIN, INPUT_PULLUP);
   pinMode(CONTROL_SWITCH_MOOSE_PIN, INPUT_PULLUP);
   pinMode(CONTROL_SWITCH_COUGAR_PIN, INPUT_PULLUP);
+
+
+  pinMode(CONTROL_UPDOWN_MOOSE_A_PIN, INPUT_PULLUP);
+  pinMode(CONTROL_UPDOWN_MOOSE_B_PIN, INPUT_PULLUP);
+  
   pinMode(13, OUTPUT);
-  delay(5000);
+  
+  turnBearOff();
+  bearOff = true;
+  
+  delay(2500);
 }
 
 
+#define MOOSE_DUTY_CYCLE (32767)
 
 
 void loop() {
-  static uint32_t lastEnc = 0;
 
-     
-   uint8_t status1,status2,status3,status4;
-  bool valid1,valid2,valid3,valid4;
-  
-  stepBear();
+  if(switchOn(CONTROL_SWITCH_BEAR_PIN))
+  {
+    if(bearOff)
+    {
+      turnBearOn();
+      bearOff = false;
+    }
+    stepBear();
+  }
+  else
+  {
+    turnBearOff();
+    bearOff = true;
+  }
+
+  if(switchOn(CONTROL_SWITCH_MOOSE_PIN))
+  {
+    if(switchOn(CONTROL_UPDOWN_MOOSE_A_PIN))
+    {
+      roboclaw.DutyM2(RCAddress, MOOSE_DUTY_CYCLE);
+    }
+    else
+    {
+      if(switchOn(CONTROL_UPDOWN_MOOSE_B_PIN))
+      {
+        roboclaw.DutyM2(RCAddress, -(MOOSE_DUTY_CYCLE));
+      }
+      else
+      {
+        roboclaw.DutyM2(RCAddress, 0);
+      }
+    }
+  }
+  else
+  {
+    roboclaw.DutyM2(RCAddress, 0);
+  }
 
 }
 

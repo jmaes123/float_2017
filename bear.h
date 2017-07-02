@@ -3,8 +3,9 @@
 
 #define BEAR_PAUSE_TIME_MSEC 1000
 #define BEAR_ERROR_TIME_MSEC 15000
+#define BEAR_STATE_TRANSITION_TIME_MSEC 4500
 #define BEAR_DUTY_CYCLE (32767/3)
-//32767
+
 
 typedef enum {
   BS_OFF,
@@ -17,9 +18,12 @@ typedef enum {
 } tBEAR_STATES;
 
 void initBear(void);
-
+void turnBearOff(void);
+void turnBearOn(void);
 void stopBear(void);
 void stepBear(void);
+
+void setBearState(tBEAR_STATES newState);
 
 #endif
 

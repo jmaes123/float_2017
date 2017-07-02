@@ -10,10 +10,14 @@
 #define CONTROL_SWITCH_COUGAR_PIN 25
 
 
+#define CONTROL_UPDOWN_MOOSE_A_PIN 30
+#define CONTROL_UPDOWN_MOOSE_B_PIN 31
+
 #define RCAddress 0x80 //Robo Claw Motor Controller's address
 
 
 bool limitReached(int switchPin);
+bool switchOn(int switchPin);
 
 
 #endif
