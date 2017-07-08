@@ -1,7 +1,8 @@
 #include <SoftwareSerial.h>
 #include <RoboClaw.h>
-#include "bear.h"
 #include "float_hardware.h"
+#include "bear.h"
+#include "moose.h"
 
 //Robo Claw Velocity PID Coefficients
 #define RC_Kp 1.0
@@ -19,12 +20,13 @@ RoboClaw roboclaw(&serial,10000);
 
 static unsigned long msTime = 0;
 static bool bearOff = true;
+static bool mooseOff = true;
 
 void setup() {
   //Open terminal and roboclaw serial ports
   terminal.begin(57600);
   roboclaw.begin(57600);
-   
+  analogReference(EXTERNAL);
 
   pinMode(BEAR_CCW_SWITCH_PIN, INPUT_PULLUP);
   pinMode(BEAR_CW_SWITCH_PIN, INPUT_PULLUP);
@@ -45,11 +47,31 @@ void setup() {
 }
 
 
-#define MOOSE_DUTY_CYCLE (32767)
-
 
 void loop() {
 
+  float c1, c2;
+  int16_t i1 = 0, i2 = 0, v;
+
+/*
+  int foo = analogRead(1);
+
+  terminal.print("POT Value: ");
+  terminal.println((foo/1024.00)*100);
+ */
+  /*
+    
+   v = roboclaw.ReadCurrents(RCAddress, i1, i2);
+
+  c1 = (float) i1/100.0;
+  c2 = (float) i2/100.0;
+
+  terminal.print(v);
+  terminal.print(" M1 current: ");
+  terminal.print(i1);
+  terminal.print(" M2 current: ");
+  terminal.println(i2);
+  */
   if(switchOn(CONTROL_SWITCH_BEAR_PIN))
   {
     if(bearOff)
@@ -67,6 +89,8 @@ void loop() {
 
   if(switchOn(CONTROL_SWITCH_MOOSE_PIN))
   {
+
+    /*
     if(switchOn(CONTROL_UPDOWN_MOOSE_A_PIN))
     {
       roboclaw.DutyM2(RCAddress, MOOSE_DUTY_CYCLE);
@@ -82,10 +106,23 @@ void loop() {
         roboclaw.DutyM2(RCAddress, 0);
       }
     }
+    */
+    
+    if(mooseOff)
+    {
+      turnMooseOn();
+      mooseOff = false;
+    }
+    
+    stepMoose();
+ 
   }
   else
   {
-    roboclaw.DutyM2(RCAddress, 0);
+    if(mooseOff == false){
+      turnMooseOff();
+      mooseOff = true;
+    }
   }
 
 }
